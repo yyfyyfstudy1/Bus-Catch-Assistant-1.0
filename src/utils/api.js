@@ -5,7 +5,6 @@ export const api = axios.create({
   // 线上 .env.production 指向官方域名
   baseURL: import.meta.env.VITE_API_BASE ?? '',
   headers:{
-    Authorization:`apikey ${import.meta.env.VITE_TRANSPORT_API_KEY}`,
     Accept:'application/json'
   }
 })
