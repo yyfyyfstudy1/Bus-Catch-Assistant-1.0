@@ -246,12 +246,7 @@ function startCatching () {
   // 使用选择的时间加10分钟作为赶车时间
   const baseTime = dayjs(selectedDateTime.value).tz('Australia/Sydney')
   const catchTime = baseTime.add(10, 'minute')
-  
-  // 如果选择的时间已经过期，提示用户
-  if (baseTime.isBefore(dayjs().tz('Australia/Sydney'))) {
-    alert('请选择未来的时间')
-    return
-  }
+
 
   console.log('开始赶车计划:', {
     选择时间: baseTime.format('YYYY-MM-DD HH:mm:ss'),
