@@ -133,8 +133,8 @@ const maxDateTime = computed(() =>
 
 /* ─── 辅助函数 ───────────────────────────────────────────── */
 function initializeDateTime () {
-  // 初始化为当前时间后10分钟
-  const now = dayjs().tz('Australia/Sydney').add(10, 'minute')
+  // 初始化为当前时间后
+  const now = dayjs().tz('Australia/Sydney')
   selectedDateTime.value = now.format('YYYY-MM-DDTHH:mm')
 }
 

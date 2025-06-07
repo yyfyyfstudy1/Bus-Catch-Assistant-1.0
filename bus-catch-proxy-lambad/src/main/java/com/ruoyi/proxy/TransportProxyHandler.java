@@ -2,44 +2,39 @@ package com.ruoyi.proxy;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class TransportProxyHandler
-        implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+        implements RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
     private static final String TFNSW_BASE = "https://api.transport.nsw.gov.au";
     private static final HttpClient HTTP   = HttpClient.newHttpClient();
 
     @Override
-    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event,
-                                                      Context ctx) {
+    public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent event, Context ctx) {
 
+        /* ---------- 0. 读取 apikey ---------- */
         String apiKey = System.getenv("TFNSW_API_KEY");
-        APIGatewayProxyResponseEvent out = new APIGatewayProxyResponseEvent();
-
         if (apiKey == null || apiKey.isBlank()) {
-            return out.withStatusCode(500)
-                    .withBody("{\"error\":\"TFNSW_API_KEY env var not set\"}");
+            return error(500, "TFNSW_API_KEY env var not set");
         }
 
         try {
-            /* === 拼 path + query === */
-            String rawPath  = event.getPath() == null ? "" : event.getPath();
-            String rawQuery = toQueryString(event.getQueryStringParameters());
-            String target   = TFNSW_BASE + rawPath + rawQuery;
+            /* ---------- 1. 还原目标 URL ---------- */
+            String rawPath  = event.getRawPath();          // 例如 /v1/tp/trip
+            String rawQuery = event.getRawQueryString();   // param1=x&param2=y
+            if (rawQuery != null && !rawQuery.isEmpty()) rawQuery = "?" + rawQuery;
 
-            /* === 调 TfNSW === */
+            String target = TFNSW_BASE + rawPath + (rawQuery == null ? "" : rawQuery);
+
+            /* ---------- 2. 请求 TfNSW ---------- */
             HttpRequest req = HttpRequest.newBuilder()
                     .uri(URI.create(target))
                     .header("Authorization", "apikey " + apiKey)
@@ -49,33 +44,30 @@ public class TransportProxyHandler
 
             HttpResponse<byte[]> res = HTTP.send(req, HttpResponse.BodyHandlers.ofByteArray());
 
-            /* === 构造响应 === */
-            Map<String,String> hdr = new HashMap<>();
-            hdr.put("Access-Control-Allow-Origin", "*");
-            hdr.put("Access-Control-Allow-Headers", "Content-Type,Authorization");
-            res.headers()
-                    .firstValue("content-type")
-                    .ifPresent(ct -> hdr.put("Content-Type", ct));
+            /* ---------- 3. 构造回包（不再重复加 CORS 头） ---------- */
+            return APIGatewayV2HTTPResponse.builder()
+                    .withStatusCode(res.statusCode())
+                    .withHeaders(Map.of(
+                            "Content-Type", res.headers()
+                                    .firstValue("content-type")
+                                    .orElse("application/json")
+                    ))
+                    .withIsBase64Encoded(false)
+                    .withBody(new String(res.body()))
+                    .build();
 
-            return out.withStatusCode(res.statusCode())
-                    .withHeaders(hdr)
-                    .withBody(new String(res.body()));   // TfNSW 都是 UTF-8 JSON
-
-        } catch (Exception e) {
-            ctx.getLogger().log("Proxy error: " + e.getMessage());
-            return out.withStatusCode(502)
-                    .withBody("{\"error\":\"proxy failed\"}");
+        } catch (Exception ex) {
+            ctx.getLogger().log("Proxy error: " + ex.getMessage());
+            return error(502, "proxy failed");
         }
     }
 
-    /** Map -> ?k=v&k2=v2 */
-    private static String toQueryString(Map<String,String> params) {
-        if (params == null || params.isEmpty()) return "";
-        return "?" + params.entrySet().stream()
-                .map(e -> url(e.getKey()) + "=" + url(e.getValue()))
-                .collect(Collectors.joining("&"));
-    }
-    private static String url(String s){
-        return URLEncoder.encode(s == null ? "" : s, StandardCharsets.UTF_8);
+    /* ---------- 小工具：统一错误响应（同样不重复加 CORS 头） ---------- */
+    private APIGatewayV2HTTPResponse error(int code, String msg) {
+        return APIGatewayV2HTTPResponse.builder()
+                .withStatusCode(code)
+                .withHeaders(Map.of("Content-Type", "application/json"))
+                .withBody("{\"error\":\"" + msg + "\"}")
+                .build();
     }
 }
