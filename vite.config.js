@@ -15,12 +15,25 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  base: process.env.NODE_ENV === 'production' ? '/Bus-Catch-Assistant/' : '/',
   server: {
     proxy: {
       '/api': {
         target: 'https://api.transport.nsw.gov.au',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue']
+        }
       }
     }
   }
