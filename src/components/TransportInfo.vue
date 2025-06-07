@@ -101,6 +101,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import isBetween from 'dayjs/plugin/isBetween'
+import { api } from '@/utils/api'
 
 /* ─── day-js 配置 ───────────────────────────────────────── */
 dayjs.extend(utc)
@@ -178,7 +179,7 @@ async function fetchTargetBusTrip(bus) {
       路线: bus.routeNumber
     })
 
-    const res = await axios.get('/api/v1/tp/trip', {
+    const res = await api.get('/v1/tp/trip', {
       headers:{ Authorization:`apikey ${API_KEY}` },
       params:{
         outputFormat:'rapidJSON',
@@ -309,7 +310,7 @@ async function fetchLightRailSchedule () {
   lightRailError.value = ''
   try {
     const base = dayjs.tz(selectedDateTime.value)             // 选中时间
-    const res  = await axios.get('/api/v1/tp/trip', {
+    const res  = await api.get('/v1/tp/trip', {
       headers:{ Authorization:`apikey ${API_KEY}`, Accept:'application/json' },
       params :{
         outputFormat:'rapidJSON', coordOutputFormat:'EPSG:4326',
@@ -363,7 +364,7 @@ async function fetchBusSchedule () {
       站点: BUS_STOP_ID
     })
 
-    const res = await axios.get('/api/v1/tp/departure_mon', {
+    const res = await api.get('/v1/tp/departure_mon', {
       headers:{ Authorization:`apikey ${API_KEY}` },
       params :{
         outputFormat:'rapidJSON',

@@ -6,35 +6,32 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    vueDevTools(),
-  ],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    },
+  plugins: [ vue(), vueDevTools() ],
+
+  resolve:{
+    alias:{ '@': fileURLToPath(new URL('./src', import.meta.url)) }
   },
-  base: process.env.NODE_ENV === 'production' ? '/Bus-Catch-Assistant/' : '/',
-  server: {
-    proxy: {
-      '/api': {
-        target: 'https://api.transport.nsw.gov.au',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+
+  // 👇 线上放 Vercel，就保持根路径即可
+  base: '/',
+
+  server:{
+    // 仅本地开发用，线上静态站不会走这里
+    proxy:{
+      '/api':{
+        target:'https://api.transport.nsw.gov.au',
+        changeOrigin:true,
+        rewrite:path=>path.replace(/^\/api/, '')
       }
     }
   },
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['vue']
-        }
-      }
+
+  build:{
+    outDir:'dist',
+    assetsDir:'assets',
+    rollupOptions:{
+      output:{ manualChunks:{ vendor:['vue'] } }
     }
   }
 })
+
