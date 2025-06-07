@@ -119,7 +119,6 @@ const targetLightRail   = ref(null)  // 目标轻轨班次
 const targetBusId       = ref(null)   // 目标公交ID
 
 /* ─── 常量（站点 TSN）────────────────────────────────────── */
-const API_KEY              = import.meta.env.VITE_TRANSPORT_API_KEY
 const LIGHT_RAIL_ORIGIN_ID = '10101606'
 const LIGHT_RAIL_DEST_ID   = '203294'
 const BUS_ORIGIN_ID        = '203290'     // Juniors Kingsford 平台 A（origin for 公交 396）
