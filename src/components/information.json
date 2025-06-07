@@ -1,0 +1,55 @@
+{
+    "version": "10.6.21.17",
+    "systemMessages": [],
+    "journeys": [
+        {
+            "rating": 0,
+            "isAdditional": false,
+            "interchanges": 0,
+            "legs": [
+                {
+                    "duration": 1200,
+                    "origin": {
+                        "id": "203294",
+                        "name": "Juniors Kingsford Light Rail, Kingsford",
+                        "type": "stop",
+                        "coord": [-33.924897, 151.228923],
+                        "departureTimeBaseTimetable": "2025-06-07T00:27:00Z",
+                        "departureTimePlanned": "2025-06-07T00:27:00Z",
+                        "departureTimeEstimated": "2025-06-07T00:26:18Z"
+                    },
+                    "destination": {
+                        "id": "203295",
+                        "name": "La Perouse",
+                        "type": "stop",
+                        "coord": [-33.988697, 151.231824],
+                        "arrivalTimeBaseTimetable": "2025-06-07T00:47:00Z",
+                        "arrivalTimePlanned": "2025-06-07T00:47:00Z",
+                        "arrivalTimeEstimated": "2025-06-07T00:46:18Z"
+                    },
+                    "transportation": {
+                        "id": "396",
+                        "name": "396",
+                        "disassembledName": "396",
+                        "number": "396",
+                        "product": {
+                            "class": 3,
+                            "name": "BUS"
+                        },
+                        "properties": {
+                            "tripCode": "754",
+                            "lineDisplay": "396"
+                        }
+                    },
+                    "stopSequence": [],
+                    "footPathInfo": null,
+                    "notes": null,
+                    "notifications": []
+                }
+            ],
+            "fare": {
+                "tickets": []
+            }
+        }
+    ]
+}
