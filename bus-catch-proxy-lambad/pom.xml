@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+           http://maven.apache.org/POM/4.0.0
+           http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- === 元信息 ===================================================== -->
+    <groupId>com.example</groupId>
+    <artifactId>bus-catch-proxy-java</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>Transport NSW Lambda Proxy</name>
+
+    <!-- === Java 与编码选项 ============================================ -->
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Shade 插件生成的最终文件名 -->
+        <finalName>transport-proxy</finalName>
+    </properties>
+
+    <!-- === 依赖 ======================================================= -->
+    <dependencies>
+        <!-- AWS Lambda 基础库：Context、RequestHandler 等 -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-core</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+
+        <!-- 用于 API Gateway Proxy 事件 / 响应的 POJO -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-events</artifactId>
+            <version>3.11.3</version>
+        </dependency>
+
+        <!-- 轻量级日志：slf4j 简单实现，可直接打印到 CloudWatch -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.13</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- 单元测试（可选） -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- === 构建与 Shade 插件 ========================================== -->
+    <build>
+        <plugins>
+            <!-- ① 编译器插件：确保用 Java 17 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.12.1</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
+            </plugin>
+
+            <!-- ② 测试插件（Jupiter） -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <useModulePath>false</useModulePath>
+                </configuration>
+            </plugin>
+
+            <!-- ③ Shade：把依赖全部打包进一个 JAR，Lambda 直接上传 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <!-- 生成 transport-proxy.jar -->
+                            <finalName>${finalName}</finalName>
+                            <!-- 移除多余的 META-INF 文件冲突 -->
+                            <relocations>
+                                <!-- 如有需要可在此添加 relocation -->
+                            </relocations>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

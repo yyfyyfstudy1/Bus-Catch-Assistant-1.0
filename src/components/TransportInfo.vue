@@ -180,7 +180,7 @@ async function fetchTargetBusTrip(bus) {
     })
 
     const res = await api.get('/v1/tp/trip', {
-      headers:{ Authorization:`apikey ${API_KEY}` },
+    
       params:{
         outputFormat:'rapidJSON',
         coordOutputFormat:'EPSG:4326',
@@ -311,7 +311,7 @@ async function fetchLightRailSchedule () {
   try {
     const base = dayjs.tz(selectedDateTime.value)             // 选中时间
     const res  = await api.get('/v1/tp/trip', {
-      headers:{ Authorization:`apikey ${API_KEY}`, Accept:'application/json' },
+
       params :{
         outputFormat:'rapidJSON', coordOutputFormat:'EPSG:4326',
         depArrMacro:'dep',
@@ -365,7 +365,6 @@ async function fetchBusSchedule () {
     })
 
     const res = await api.get('/v1/tp/departure_mon', {
-      headers:{ Authorization:`apikey ${API_KEY}` },
       params :{
         outputFormat:'rapidJSON',
         coordOutputFormat:'EPSG:4326',
